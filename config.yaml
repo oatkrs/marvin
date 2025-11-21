@@ -1,0 +1,16 @@
+# Marvin Configuration
+
+sources:
+  - type: windows_evtx
+    log_type: Application
+    interval: 2.0
+
+  - type: file
+    path: C:\Users\theda\.gemini\antigravity\scratch\test.log
+    interval: 0.5
+
+sinks:
+  - type: stdout
+
+  - type: file
+    path: output.json

@@ -1,0 +1,44 @@
+# Marvin Configuration
+
+sources:
+  - type: windows_evtx
+    log_type: Application
+    interval: 2.0
+    filters:
+      - "Security"
+      - "Error"
+
+  - type: file
+    path: C:\Users\theda\.gemini\antigravity\scratch\test.log
+    interval: 0.5
+    filters:
+# Marvin Configuration
+
+sources:
+  - type: windows_evtx
+    log_type: Application
+    interval: 2.0
+    filters:
+      - "Security"
+      - "Error"
+
+  - type: file
+    path: C:\Users\theda\.gemini\antigravity\scratch\test.log
+    interval: 0.5
+    filters:
+      - "IMPORTANT"
+
+  - type: command
+    command: echo "System Status Check" && ipconfig
+    interval: 5.0
+
+  - type: windows_registry
+    keys:
+      - "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+    interval: 60.0
+
+sinks:
+  - type: stdout
+
+  - type: file
+    path: output_v2.json

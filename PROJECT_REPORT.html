@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Report: Marvin</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #d4d4d4;
+            --accent-color: #4ec9b0;
+            --header-color: #569cd6;
+            --code-bg: #2d2d2d;
+            --quote-color: #ce9178;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        h1, h2, h3 {
+            color: var(--header-color);
+            border-bottom: 1px solid #3e3e42;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 0.5em; }
+        h2 { margin-top: 2em; }
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: var(--accent-color);
+        }
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: #dcdcaa;
+        }
+        .easter-egg {
+            font-style: italic;
+            color: var(--quote-color);
+            border-left: 3px solid var(--quote-color);
+            padding-left: 10px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Project Report: Marvin</h1>
+    <p><strong>Codename:</strong> "Paranoid Android"<br>
+    <strong>Version:</strong> 1.0.0<br>
+    <strong>Date:</strong> November 20, 2025</p>
+
+    <div class="easter-egg">
+        "I think you ought to know I'm feeling very depressed."
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <p>Marvin is a specialized, cross-platform forensic log collection utility designed to operate with high integrity and minimal overhead. It addresses the critical need for a reliable, verifiable, and flexible log aggregation tool capable of functioning in diverse environments (Windows and Linux).</p>
+    <p>While the universe is vast and complex, the task of collecting logs is, by comparison, trivial and arguably beneath the processing capabilities of a brain the size of a planet. Nevertheless, Marvin performs this function with a level of precision that borders on the depressive.</p>
+
+    <h2>2. System Architecture</h2>
+    <p>Marvin utilizes a modular, asynchronous architecture powered by Python's <code>asyncio</code> framework. This design ensures non-blocking operation, allowing for the concurrent collection of data from multiple sources without performance degradation.</p>
+
+    <h3>Core Components</h3>
+    <ul>
+        <li><strong>The Collector Layer:</strong> Abstracts the specific logic for retrieving data from various sources (e.g., Windows Event Logs, Registry, Text Files, Shell Commands). It implements a <code>should_collect()</code> filter to discard irrelevant data before it enters the processing pipeline.</li>
+        <li><strong>The Normalization Layer:</strong> All collected data is standardized into a <code>LogEvent</code> dataclass, ensuring a consistent schema regardless of origin.</li>
+        <li><strong>The Sink Layer:</strong> Handles the output of normalized data to configured destinations, supporting local file storage (with integrity hashing), console output, and secure HTTP forwarding.</li>
+    </ul>
+
+    <div class="easter-egg">
+        "Life? Don't talk to me about life."
+    </div>
+
+    <h2>3. Key Features</h2>
+    
+    <h3>3.1 Integrity and Verification</h3>
+    <p>To ensure forensic validity, Marvin implements rigorous integrity checks:</p>
+    <ul>
+        <li><strong>Manifest Generation:</strong> Upon completion, Marvin calculates a SHA-256 hash of the output file and writes it to a companion <code>.manifest</code> file. This provides a cryptographic guarantee that the logs have not been tampered with.</li>
+        <li><strong>Metadata Headers:</strong> Every collection session begins with a metadata event detailing the tool version, user context, and start time.</li>
+    </ul>
+
+    <h3>3.2 Forensic Specificity</h3>
+    <ul>
+        <li><strong>Windows Registry:</strong> Capable of monitoring specific registry keys for unauthorized changes.</li>
+        <li><strong>Command Execution:</strong> Periodically executes shell commands (e.g., <code>ipconfig</code>, <code>netstat</code>) to capture volatile system state.</li>
+        <li><strong>Granular Filtering:</strong> Supports regex and substring filtering to isolate significant events from the background noise of the universe.</li>
+    </ul>
+
+    <h3>3.3 Secure Forwarding</h3>
+    <ul>
+        <li><strong>TLS/SSL Encryption:</strong> Ensures data confidentiality during transit.</li>
+        <li><strong>Bearer Token Authentication:</strong> Validates the identity of the collector against the receiving endpoint.</li>
+    </ul>
+
+    <h2>4. Operational Guide</h2>
+
+    <h3>4.1 Configuration</h3>
+    <p>Marvin is configured via a YAML file (<code>config.yaml</code>). This file defines the active collectors, their intervals, and the desired output sinks.</p>
+
+    <pre><code>sources:
+  - type: windows_evtx
+    log_type: Security
+    filters: ["Logon", "Special Privilege"]
+  - type: command
+    command: netstat -an
+    interval: 300
+
+sinks:
+  - type: file
+    path: evidence.json</code></pre>
+
+    <h3>4.2 Execution</h3>
+    <p>Marvin can be deployed as a single executable, eliminating the need for dependency management on the target host.</p>
+
+    <p><strong>Running the Executable:</strong></p>
+    <pre><code>marvin.exe --config config.yaml</code></pre>
+
+    <p><strong>Running from Source:</strong></p>
+    <pre><code>python marvin/main.py --config config.yaml</code></pre>
+
+    <h2>5. What to Expect</h2>
+    <p>Upon execution, Marvin will silently initialize its collectors. You will not see a flurry of activity; Marvin prefers to suffer in silence.</p>
+    <ul>
+        <li><strong>Output:</strong> A JSON file containing a stream of <code>LogEvent</code> objects.</li>
+        <li><strong>Manifest:</strong> A <code>.manifest</code> file containing the SHA-256 hash.</li>
+        <li><strong>Console:</strong> Minimal output indicating status, unless <code>stdout</code> sink is enabled.</li>
+    </ul>
+
+    <div class="easter-egg">
+        "I've calculated your chance of survival, but I don't think you'll like it."
+    </div>
+
+    <h2>6. Conclusion</h2>
+    <p>Marvin successfully fulfills all functional requirements for a forensic log collector. It is robust, secure, and verifiable. It is also terribly bored.</p>
+
+    <div class="footer">
+        Generated by Antigravity | Don't panic.
+    </div>
+
+</body>
+</html>
