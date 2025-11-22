@@ -1,0 +1,15 @@
+sources:
+  - type: command
+    command: echo Marvin Demo System Check
+    interval: 2.0
+
+  - type: file
+    path: demo_test.log
+    interval: 1.0
+    filters:
+      - "DEMO_EVENT"
+
+sinks:
+  - type: stdout
+  - type: file
+    path: demo_output.json
