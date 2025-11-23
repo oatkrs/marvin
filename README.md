@@ -1,84 +1,146 @@
 # Marvin: The Paranoid Android - Forensic Log Collector
 
-Marvin is a lightweight, cross-platform (Windows/Linux) forensic log collection tool designed for simplicity, modularity, and integrity. It collects logs from various sources, normalizes them, and forwards them to configured destinations.
+> **Research Project Submission**
+>
+> **Course:** ITIS 5250 Computer Forensics
+> **Professor:** Victor Gibson Grose
+> **Authors:** Utkarsh Parashar and Chetali Bandodkar
+> **Institution:** Graduate Research
 
-## Features
+---
 
-*   **Cross-Platform:** Runs on Windows and Linux.
-*   **Modular Architecture:** Plug-and-play Collectors and Sinks.
-*   **Integrity:**
-    *   **Manifest Generation:** Automatically generates a SHA-256 manifest (`.manifest`) for output files upon completion.
-    *   **Metadata:** Emits a collection start event with tool version, hostname, user, and time.
-*   **Forensic Specificity:**
-    *   **Filtering:** Supports regex and substring filtering at the collector level to reduce noise.
-    *   **Windows Registry:** Collects specified registry keys and values.
-    *   **Command Execution:** Executes shell commands and captures output (e.g., `ipconfig`, `netstat`).
-*   **Secure Forwarding:**
-    *   **HTTPS:** Supports TLS/SSL forwarding with Bearer token authentication.
-*   **Single Executable:** Can be built into a standalone executable using PyInstaller.
+## 1. Overview
 
-## Collectors
+Marvin is a lightweight, cross-platform (Windows/Linux) forensic log collection tool designed for simplicity, modularity, and integrity. Unlike general-purpose log shippers, Marvin is built with forensic principles in mind, ensuring that data is collected, normalized, and stored with verifiable integrity.
 
-*   **Windows Event Logs (`windows_evtx`):** Collects logs from Windows Event Log (e.g., Application, Security).
-*   **Windows Registry (`windows_registry`):** Monitors specified registry keys.
-*   **File Tail (`file`):** Tails text files (e.g., application logs).
-*   **Command (`command`):** Periodically executes shell commands.
-*   **Linux Syslog (`linux_syslog`):** Tails `/var/log/syslog`.
-*   **Linux Journald (`linux_journald`):** Collects from systemd journal.
+Named after the "Paranoid Android" from *The Hitchhiker's Guide to the Galaxy*, Marvin takes a paranoid approach to log collection—assuming that every event matters and that the integrity of the collected data is paramount.
 
-## Sinks
+## 2. Technical Architecture
 
-*   **Console (`stdout`):** Prints logs to standard output.
-*   **File (`file`):** Writes logs to a JSON file (with manifest generation).
-*   **HTTP (`http`):** POSTs logs to a web endpoint (supports `auth_token`).
+Marvin is built on a modern, asynchronous Python architecture (`asyncio`), allowing it to perform high-frequency polling and event processing with minimal system overhead.
 
-## Configuration
+### 2.1 Core Components
 
-Marvin is configured via a YAML file. See `config_v2.yaml` for a comprehensive example.
+1.  **Collectors:** Modular components responsible for interfacing with specific data sources (e.g., Windows Event API, Registry, File System, Shell). They run concurrently and independently.
+2.  **Normalization Engine:** All collected data is transformed into a standardized `LogEvent` schema, ensuring consistency regardless of the source.
+    *   **Schema:** `timestamp`, `source_type`, `host`, `message`, `raw_data` (JSON), `metadata`.
+3.  **Sinks:** Destinations for the normalized data. Sinks handle the formatting and transmission of logs (e.g., to a file, console, or HTTP endpoint).
+
+### 2.2 Integrity & Forensics
+
+*   **Manifest Generation:** Upon completion of a collection session, Marvin automatically calculates the SHA-256 hash of the output file and writes it to a companion `.manifest` file. This ensures that the evidence file has not been tampered with after collection.
+*   **Metadata Events:** The first event in every stream is a `marvin_metadata` event, capturing the tool version, start time, user context, and hostname, establishing a chain of custody start point.
+*   **Non-Destructive:** Marvin operates in a read-only manner regarding the source data.
+
+## 3. Installation & Build
+
+### 3.1 Prerequisites
+*   **Python:** 3.8 or higher.
+*   **OS:** Windows 10/11/Server or Linux (Modern Distributions).
+
+### 3.2 Installation from Source
+```bash
+git clone https://github.com/your-repo/marvin.git
+cd marvin
+pip install -r requirements.txt
+```
+
+### 3.3 Building the Executable
+To create a standalone, portable executable (no Python installation required on target):
+
+```bash
+python -m PyInstaller --onefile --name marvin --hidden-import=win32timezone --clean main.py
+```
+The executable will be located in `dist/marvin.exe`.
+
+## 4. Configuration Guide
+
+Marvin is configured via a YAML file. Below is a comprehensive reference of all available options.
+
+### 4.1 Global Structure
+The configuration file is divided into `sources` (collectors) and `sinks` (destinations).
 
 ```yaml
 sources:
-  - type: windows_evtx
-    log_type: Application
-    filters:
-      - "Error"
-  - type: windows_registry
-    keys:
-      - "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
-  - type: command
-    command: ipconfig
-    interval: 60
+  - type: <collector_type>
+    # ... collector specific options ...
 
 sinks:
-  - type: file
-    path: output.json
-  - type: http
-    url: https://collector.example.com/logs
-    auth_token: "secret-token"
+  - type: <sink_type>
+    # ... sink specific options ...
 ```
 
-## Building
+### 4.2 Collectors (Sources)
 
-To build a single executable:
+#### Windows Event Logs (`windows_evtx`)
+Collects logs from the Windows Event Log system.
+*   `type`: `windows_evtx`
+*   `log_type`: The log channel to read (e.g., `Application`, `Security`, `System`). Default: `Application`.
+*   `server`: The remote server to query (optional). Default: `localhost`.
+*   `interval`: Polling interval in seconds. Default: `1.0`.
+*   `filters`: List of regex strings or substrings. Only messages matching a filter will be collected.
 
-1.  Install dependencies: `pip install -r requirements.txt`
-2.  Run PyInstaller:
-    ```bash
-    python -m PyInstaller --onefile --name marvin --hidden-import=win32timezone --clean main.py
-    ```
-3.  The executable will be in `dist/marvin.exe`.
+#### Windows Registry (`windows_registry`)
+Monitors specified registry keys for current values.
+*   `type`: `windows_registry`
+*   `keys`: List of full registry paths to monitor.
+    *   Example: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+*   `interval`: Polling interval in seconds. Default: `60.0`.
 
-## Usage
+#### File Tail (`file`)
+Tails a text file in real-time (like `tail -f`).
+*   `type`: `file`
+*   `path`: Absolute path to the file.
+*   `interval`: Polling interval in seconds. Default: `0.1`.
+*   `filters`: List of regex strings or substrings.
 
+#### Command Execution (`command`)
+Periodically executes a shell command and captures the output.
+*   `type`: `command`
+*   `command`: The shell command to execute (e.g., `ipconfig /all`, `netstat -an`).
+*   `interval`: Execution interval in seconds. Default: `60.0`.
+
+#### Linux Syslog (`linux_syslog`)
+Tails the standard Linux syslog file.
+*   `type`: `linux_syslog`
+*   `path`: Path to syslog. Default: `/var/log/syslog`.
+
+#### Linux Journald (`linux_journald`)
+Collects structured logs from systemd-journald.
+*   `type`: `linux_journald`
+
+### 4.3 Sinks (Destinations)
+
+#### JSON File (`file`)
+Writes logs to a local JSON file. Generates a SHA-256 manifest on close.
+*   `type`: `file`
+*   `path`: Path to the output file.
+
+#### HTTP Forwarder (`http`)
+POSTs logs to a remote web server.
+*   `type`: `http`
+*   `url`: The full URL of the endpoint.
+*   `auth_token`: Optional Bearer token for authentication.
+*   `timeout`: Request timeout in seconds. Default: `10`.
+*   `headers`: Custom headers dictionary. Default: `Content-Type: application/json`.
+
+#### Console (`stdout`)
+Prints logs to the standard output (terminal).
+*   `type`: `stdout`
+
+## 5. Usage
+
+### Running from Source
 ```bash
-# Run from source
-python marvin/main.py --config marvin/config_v2.yaml
-
-# Run executable
-dist/marvin.exe --config marvin/config_v2.yaml
+python marvin/main.py --config config.yaml
 ```
 
-## Demo
+### Running the Executable
+```bash
+dist/marvin.exe --config config.yaml
+```
+
+## 6. Demo
 
 To verify the full lifecycle (Build -> Run -> Verify), run the included PowerShell demo script:
 
@@ -91,3 +153,7 @@ This script will:
 2.  Create a temporary `demo_config.yaml` and log file.
 3.  Run Marvin to collect command output and file logs.
 4.  Verify the integrity of the output JSON and Manifest.
+
+## 7. License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
