@@ -77,3 +77,17 @@ python marvin/main.py --config marvin/config_v2.yaml
 # Run executable
 dist/marvin.exe --config marvin/config_v2.yaml
 ```
+
+## Demo
+
+To verify the full lifecycle (Build -> Run -> Verify), run the included PowerShell demo script:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File demo_marvin.ps1
+```
+
+This script will:
+1.  Build the `marvin.exe` executable.
+2.  Create a temporary `demo_config.yaml` and log file.
+3.  Run Marvin to collect command output and file logs.
+4.  Verify the integrity of the output JSON and Manifest.
