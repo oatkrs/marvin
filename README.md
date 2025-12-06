@@ -154,6 +154,22 @@ This script will:
 3.  Run Marvin to collect command output and file logs.
 4.  Verify the integrity of the output JSON and Manifest.
 
-## 7. License
+## 8. Troubleshooting
+
+### "demo_output.json was NOT created" or Executable Fails to Start
+
+If the `marvin.exe` executable fails to start or the demo script reports that the output file was not created, it is likely due to missing system prerequisites on the target Windows machine.
+
+**Prerequisite:**
+*   **Microsoft Visual C++ Redistributable:** PyInstaller-built applications on Windows often require the Visual C++ Redistributable (specifically `VCRUNTIME140.dll`).
+*   **Solution:** Download and install the latest "Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022" (both x86 and x64 versions recommended) from the [official Microsoft website](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).
+
+### Missing "DEMO_EVENT" in Output
+
+If the demo script warns that `DEMO_EVENT` was not found:
+*   This is often a timing or file locking issue specific to the test environment (e.g., PowerShell holding a lock on the log file while Marvin tries to read it).
+*   Verify that `demo_output.json` contains other events (like `command_output`). If so, the tool is functioning correctly.
+
+## 9. License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

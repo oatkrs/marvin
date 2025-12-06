@@ -1,7 +1,4 @@
-# Marvin Ultimate Demo Script
-# This script demonstrates the full lifecycle of the Marvin Log Collector:
-# 1. Build (PyInstaller)
-# Marvin Ultimate Demo Script
+
 # This script demonstrates the full lifecycle of the Marvin Log Collector:
 # 1. Build (PyInstaller)
 # 2. Configuration Setup
